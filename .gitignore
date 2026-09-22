@@ -126,3 +126,8 @@ dask-worker-space/
 
 # PyTorch Lightning
 lightning_logs/
+
+# outillage local, pas du code produit
+AGENTS.md
+opencode.json
+.opencode-prompts.jsonl
