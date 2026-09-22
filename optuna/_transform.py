@@ -297,7 +297,11 @@ def _untransform_numerical_param(
                 param = int(trans_param)
         else:
             param = int(
-                np.clip(np.round((trans_param - d.low) / d.step) * d.step + d.low, d.low, d.high)
+                np.clip(
+                    np.floor((trans_param - d.low) / d.step + 0.5) * d.step + d.low,
+                    d.low,
+                    d.high,
+                )
             )
     else:
         assert False, "Should not reach. Unexpected distribution."

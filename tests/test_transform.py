@@ -225,3 +225,38 @@ def test_transform_untransform_params_at_bounds(
     trans_upper_param = _untransform_numerical_param(upper_bound, distribution, transform_log)
     assert trans_lower_param == distribution.low  # type: ignore
     assert trans_upper_param == distribution.high  # type: ignore
+
+
+@pytest.mark.parametrize(
+    "trans_param,distribution,expected",
+    [
+        # IntDistribution with step=1: midpoints between integers should round correctly
+        (2.5, IntDistribution(0, 10, step=1), 3),
+        (3.5, IntDistribution(0, 10, step=1), 4),
+        (4.5, IntDistribution(0, 10, step=1), 5),
+        (5.5, IntDistribution(0, 10, step=1), 6),
+        # IntDistribution with step=2: midpoints between values (0,2,4,6,8,10)
+        # floor((1.0-0)/2 + 0.5) = floor(1.0) = 1 => 1*2+0 = 2
+        (1.0, IntDistribution(0, 10, step=2), 2),
+        # floor((3.0-0)/2 + 0.5) = floor(2.0) = 2 => 2*2 = 4
+        (3.0, IntDistribution(0, 10, step=2), 4),
+        # floor((5.0-0)/2 + 0.5) = floor(3.0) = 3 => 3*2 = 6
+        (5.0, IntDistribution(0, 10, step=2), 6),
+        # floor((7.0-0)/2 + 0.5) = floor(4.0) = 4 => 4*2 = 8
+        (7.0, IntDistribution(0, 10, step=2), 8),
+        # floor((9.0-0)/2 + 0.5) = floor(5.0) = 5 => 5*2 = 10
+        (9.0, IntDistribution(0, 10, step=2), 10),
+        # IntDistribution with step=3: midpoints between values 0,3,6,9
+        # floor((1.5-0)/3 + 0.5) = floor(1.0) = 1 => 1*3 = 3
+        (1.5, IntDistribution(0, 9, step=3), 3),
+        # floor((4.5-0)/3 + 0.5) = floor(2.0) = 2 => 2*3 = 6
+        (4.5, IntDistribution(0, 9, step=3), 6),
+        # floor((7.5-0)/3 + 0.5) = floor(3.0) = 3 => 3*3 = 9
+        (7.5, IntDistribution(0, 9, step=3), 9),
+    ],
+)
+def test_untransform_numerical_param_no_even_bias(
+    trans_param: float, distribution: BaseDistribution, expected: int | float
+) -> None:
+    result = _untransform_numerical_param(trans_param, distribution, transform_log=True)
+    assert result == expected
